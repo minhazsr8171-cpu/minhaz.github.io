@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Happy Birthday Butki 🎉</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #fceabb, #f8b500);
+      color: #333;
+      text-align: center;
+      overflow-x: hidden;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-top: 30px;
+      color: #d54b4b;
+      text-shadow: 1px 1px 3px #f9e2e2;
+    }
+    p {
+      font-size: 1.3rem;
+      margin: 10px 0 30px 0;
+      color: #5a3e3e;
+    }
+    .cake {
+      margin: 0 auto;
+      position: relative;
+      width: 220px;
+      height: 140px;
+      background: #ffb347;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    .candle {
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 50px;
+      background: white;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    .flame {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 22px;
+      height: 30px;
+      background: radial-gradient(circle at center, #ffd93b 0%, #ff6f00 70%, transparent 100%);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      animation: flicker 1s infinite;
+      pointer-events: none;
+    }
+    @keyframes flicker {
+      0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+      50% { transform: translateX(-50%) scale(1.15); opacity: 0.8; }
+    }
+    #candleToggle {
+      margin-top: 30px;
+      transform: scale(1.4);
+      cursor: pointer;
+    }
+    .hearts {
+      font-size: 2.5rem;
+      animation: float 3s infinite ease-in-out;
+      margin-top: 25px;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    /* Confetti canvas fills the screen */
+    #confettiCanvas {
+      position: fixed;
+      pointer-events: none;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1000;
+    }
+    /* Balloons */
+    .balloon {
+      position: fixed;
+      bottom: -150px;
+      width: 40px;
+      height: 60px;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      opacity: 0.9;
+      animation-name: rise;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+      z-index: 999;
+    }
+    @keyframes rise {
+      0% { bottom: -150px; opacity: 1; }
+      100% { bottom: 110vh; opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Happy Birthday Butki 🎉</h1>
+  <p>You are my joy, my heart, my forever love! 💖</p>
+
+  <div class="cake" aria-label="Birthday cake">
+    <div class="candle" id="candle" tabindex="0" role="button" aria-pressed="true" aria-label="Toggle candle flame">
+      <div class="flame" id="flame"></div>
+    </div>
+  </div>
+
+  <input type="checkbox" id="candleToggle" aria-label="Blow out candle toggle" checked>
+  <label for="candleToggle">Toggle Candle Flame</label>
+
+  <div class="hearts">💖 💕 💗 💓 💞</div>
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <script>
+    const candleToggle = document.getElementById('candleToggle');
+    const flame = document.getElementById('flame');
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const ctx = confettiCanvas.getContext('2d');
+
+    let confettiPieces = [];
+    let confettiAnimationRunning = false;
+
+    // Adjust canvas size
+    function resizeCanvas() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Confetti setup
+    function randomRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+    function createConfettiPiece() {
+      return {
+        x: randomRange(0, confettiCanvas.width),
+        y: randomRange(-confettiCanvas.height, 0),
+        r: randomRange(4, 10),
+        d: randomRange(10, 20),
+        color: `hsl(${randomRange(0, 360)}, 70%, 60%)`,
+        tilt: randomRange(-10, 10),
+        tiltAngle: 0,
+        tiltAngleIncrement: randomRange(0.05, 0.12),
+      };
+    }
+
+    function initConfetti() {
+      confettiPieces = [];
+      for (let i = 0; i < 120; i++) {
+        confettiPieces.push(createConfettiPiece());
+      }
+    }
+
+    function updateConfetti() {
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      confettiPieces.forEach(p => {
+        p.tiltAngle += p.tiltAngleIncrement;
+        p.y += (Math.cos(p.d) + 3) / 2 + 1;
+        p.x += Math.sin(p.tiltAngle);
+        p.tilt = Math.sin(p.tiltAngle) * 15;
+
+        ctx.beginPath();
+        ctx.lineWidth = p.r / 2;
+        ctx.strokeStyle = p.color;
+        ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+        ctx.stroke();
+      });
+
+      confettiPieces = confettiPieces.filter(p => p.y < confettiCanvas.height + 20);
+
+      if (confettiPieces.length > 0) {
+        requestAnimationFrame(updateConfetti);
+      } else {
+        confettiAnimationRunning = false;
+      }
+    }
+
+    // Balloon setup
+    function launchBalloons() {
+      const colors = ['#ff6f91', '#ff92a5', '#ffb3bc', '#ffc6ca', '#ffe0e6'];
+      for (let i = 0; i < 8; i++) {
+        const balloon = document.createElement('div');
+        balloon.className = 'balloon';
+        balloon.style.left = `${10 + i * 12}%`;
+        balloon.style.background = colors[i % colors.length];
+        balloon.style.animationDuration = `${5 + i * 0.3}s`;
+        balloon.style.animationDelay = `${i * 250}ms`;
+        document.body.appendChild(balloon);
+        setTimeout(() => {
+          balloon.remove();
+        }, 7000);
+      }
+    }
+
+    // Birthday music - soft, pleasant "Happy Birthday"
+    let audioCtx, gainNode, oscillators = [];
+    const notes = [
+      [264, 400], [264, 400], [297, 800], [264, 800], [352, 800], [330, 1600],
+      [264, 400], [264, 400], [297, 800], [264, 800], [396, 800], [352, 1600],
+      [264, 400], [264, 400], [528, 800], [440, 800], [352, 800], [330, 800], [297, 1600],
+      [466, 400], [466, 400], [440, 800], [352, 800], [396, 800], [352, 1600]
+    ];
+
+    function playMusic() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime); // very soft volume
+        gainNode.connect(audioCtx.destination);
+      }
+      let time = audioCtx.currentTime;
+      oscillators = [];
+
+      notes.forEach(([freq, dur]) => {
+        let osc = audioCtx.createOscillator();
+        osc.frequency.setValueAtTime(freq, time);
+        osc.type = 'sine';
+        osc.connect(gainNode);
+        osc.start(time);
+        osc.stop(time + dur / 1000);
+        oscillators.push(osc);
+        time += dur / 1000;
+      });
+    }
+
+    function startCelebration() {
+      flame.style.opacity = candleToggle.checked ? '1' : '0';
+      if (!candleToggle.checked) {
+        if (!confettiAnimationRunning) {
+          confettiAnimationRunning = true;
+          initConfetti();
+          updateConfetti();
+          launchBalloons();
+          playMusic();
+        }
+      }
+    }
+
+    candleToggle.addEventListener('change', startCelebration);
+
+    // Initialize
+    candleToggle.checked = true;
+    flame.style.opacity = '1';
+  </script>
+</body>
+</html>
